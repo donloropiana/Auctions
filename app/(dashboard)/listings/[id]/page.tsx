@@ -9,14 +9,13 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
 import { formatPrice } from '@/lib/utils/price-format';
-import { CartesianGrid, Line, LineChart, XAxis, YAxis, Tooltip } from 'recharts';
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { Line, LineChart, XAxis, YAxis, Tooltip } from 'recharts';
+import { ChartConfig } from '@/components/ui/chart';
 import { ResponsiveContainer } from 'recharts';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { User } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 
 const chartConfig = {

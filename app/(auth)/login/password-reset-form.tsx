@@ -59,7 +59,7 @@ export function PasswordResetForm() {
           placeholder="Email"
           control={form.control}
         />
-        <Button className="w-full" loading={isPending}>
+        <Button className="w-full">
           Reset password
         </Button>
       </form>
