@@ -12,8 +12,10 @@ import {
 import { Plus } from "lucide-react";
 import ListingForm from "./listing-form";
 import { useState } from "react";
+import { useRouter } from 'next/navigation';
 
 export function CreateListingButton() {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
 
   return (
@@ -31,7 +33,7 @@ export function CreateListingButton() {
             Fill out the form below to create a new auction listing.
           </DialogDescription>
         </DialogHeader>
-        {open && <ListingForm />}
+        {open && <ListingForm onSuccess={() => {setOpen(false); router.refresh();}} />}
       </DialogContent>
     </Dialog>
   );

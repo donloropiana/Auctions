@@ -2,8 +2,8 @@
 
 import { useParams } from 'next/navigation';
 import { useSupabase } from '@/components/providers/supabase-provider';
-import { useQuery } from '@tanstack/react-query';
-import { getListing } from '@/lib/api/listings';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { getListing, submitBid } from '@/lib/api/listings';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,6 +12,12 @@ import { formatPrice } from '@/lib/utils/price-format';
 import { CartesianGrid, Line, LineChart, XAxis, YAxis, Tooltip } from 'recharts';
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { ResponsiveContainer } from 'recharts';
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
+import { User } from '@supabase/supabase-js';
+import { useRouter } from 'next/navigation';
 
 const chartConfig = {
   price: {
@@ -21,14 +27,48 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function ListingPage() {
+  const router = useRouter();
   const { id } = useParams();
-  const { supabase } = useSupabase();
-  
+  const { supabase, user, profile } = useSupabase();
+
+  useEffect(() => {
+    if (!user) {
+      router.replace('/login');
+    }
+  }, [user, router]);
+
   const { data: listing, isLoading } = useQuery({
     queryKey: ['listing', id],
     queryFn: () => getListing(supabase, parseInt(id as string))
   });
 
+  const minBidAmount = (listing?.current_price?.amount ?? 0) + 5;
+  const [bidAmount, setBidAmount] = useState<number>(0);
+
+  useEffect(() => {
+    if (listing?.current_price?.amount) {
+      setBidAmount(listing.current_price.amount + 5);
+    }
+  }, [listing?.current_price?.amount]);
+
+  const queryClient = useQueryClient();
+
+  const handleBid = async () => {
+    try {
+      await submitBid(parseInt(id as string), bidAmount);
+      await queryClient.invalidateQueries({ queryKey: ['listing', id] });
+      toast.success('Bid placed successfully!');
+    } catch (error) {
+      toast.error('Failed to place bid');
+    }
+  };
+
+  const now = new Date();
+  const startDateTime = new Date(listing?.start_date_time ?? '');
+  const endDateTime = new Date(listing?.end_date_time ?? '');
+  const isWithinActiveTimeRange = now >= startDateTime && now < endDateTime;
+
+  if (!user || !profile) return null;
   if (isLoading) return <div>Loading...</div>;
   if (!listing) return <div>Not found</div>;
   console.log('Price history for chart:', listing.priceHistory);
@@ -192,16 +232,36 @@ export default function ListingPage() {
                 />
                 <Line
                   dataKey="amount"
-                  type="stepAfter"
-                  stroke="var(--color-price)"
+                  type="monotone"
+                  stroke="hsl(var(--chart-1))"
                   strokeWidth={2}
-                  dot={{ r: 6, fill: "var(--color-price)" }}
+                  dot={{ r: 6, fill: "hsl(var(--chart-1))" }}
                   activeDot={{ r: 8 }}
                 />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
+
+        {listing.status === 'active' && listing.seller_id !== user?.id && isWithinActiveTimeRange && (
+          <div className="mt-4 space-y-2">
+            <div className="flex gap-2">
+              <Input
+                type="number"
+                min={minBidAmount}
+                step="1"
+                value={bidAmount}
+                onChange={(e) => setBidAmount(Number(e.target.value))}
+              />
+              <Button onClick={handleBid}>
+                Place Bid
+              </Button>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Minimum bid: {formatPrice(minBidAmount)}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

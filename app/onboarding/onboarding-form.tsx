@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import type { z } from 'zod'
@@ -18,6 +18,8 @@ import { CalendarInput } from '@/components/ui/calendar-input'
 export default function OnboardingForm() {
   const { user } = useSupabase()
   const router = useRouter()
+  const queryClient = useQueryClient()
+  
   const form = useForm<z.infer<typeof onboardingFormSchema>>({
     resolver: zodResolver(onboardingFormSchema),
     defaultValues: {
@@ -32,6 +34,7 @@ export default function OnboardingForm() {
     mutationFn: insertProfile,
     onSuccess: () => {
       toast.success('Onboarding completed. Redirecting to your dashboard...')
+      queryClient.invalidateQueries({ queryKey: ['profile'] })
       router.push('/home')
     },
     onError: () => {

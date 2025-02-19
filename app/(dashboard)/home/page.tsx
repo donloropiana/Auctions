@@ -1,24 +1,20 @@
-import Image from 'next/image'
-import { redirect } from 'next/navigation'
+'use client'
 
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useSupabase } from '@/components/providers/supabase-provider'
 import { Body, Header } from '@/components/ui/container'
-import { createClient } from '@/lib/supabase/server'
 
-export const metadata = {
-  title: 'Home',
-}
+export default function Home() {
+  const router = useRouter()
+  const { user, profile } = useSupabase()
+  
+  useEffect(() => {
+    if (!user) {
+      router.replace('/login')
+    }
+  }, [user, router])
 
-export default async function Home() {
-  const supabase = await createClient()
-  const { data: auth, error } = await supabase.auth.getUser()
-  if (!auth.user || error) redirect('/login')
-
-  const { data: user } = await supabase
-    .from('profiles')
-    .select('id, first_name, last_name')
-    .eq('id', auth.user.id)
-    .single()
-  if (!user) redirect('/onboarding')
 
   const now = new Date()
   const hour = now.getHours()
@@ -35,7 +31,7 @@ export default async function Home() {
 
   return (
     <div className="flex h-full flex-col">
-      <Header className="md:border-b-0" title={`${greeting}, ${user.first_name}`} />
+      <Header className="md:border-b-0" title={`${greeting}, ${profile?.first_name}`} />
       <Body className="absolute inset-0 -z-10 flex items-center justify-center overflow-hidden">
         <div className="text-4xl font-bold text-center">
           Welcome to the Home Page

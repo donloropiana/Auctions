@@ -26,7 +26,7 @@ export function CalendarInput({ control, name, placeholder = "Select date", labe
             <PopoverTrigger asChild>
               <Input
                 readOnly
-                value={field.value ? format(new Date(field.value + "T00:00:00"), "yyyy-MM-dd") : ""}
+                value={field.value ? format(new Date(field.value + "T00:00:00"), "yyyy-MM-dd") : "Click to select date"}
                 placeholder={placeholder}
               />
             </PopoverTrigger>

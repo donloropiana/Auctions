@@ -1,3 +1,5 @@
+import { cookies } from 'next/headers'
+import { createClient } from '@/lib/supabase/server'
 import type { Metadata, Viewport } from 'next'
 
 import './globals.css'
@@ -51,11 +53,18 @@ export const viewport: Viewport = {
   userScalable: false,
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  // Prehydrate the session on the server:
+  const cookieStore = cookies()
+  const supabaseClient = await createClient() // from lib/supabase/server.ts
+  const {
+    data: { session },
+  } = await supabaseClient.auth.getSession()
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -64,7 +73,7 @@ export default function RootLayout({
       <body className={`min-h-screen antialiased ${inter.className}`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ReactQueryProvider>
-            <SupabaseProvider>
+            <SupabaseProvider initialSession={session}>
               <TooltipProvider>
                 <div className="relative flex min-h-screen flex-col sm:overflow-hidden">
                   {children}

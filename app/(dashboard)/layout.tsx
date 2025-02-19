@@ -13,7 +13,7 @@ export default async function SidebarLayout({
   return (
     <div className="relative h-screen">
       <div className="flex flex-1 overflow-x-hidden sm:h-full">
-        <Sidebar isExpandedInitially={isExpandedInitially} projects={[]} playlists={[]} />
+        <Sidebar isExpandedInitially={isExpandedInitially}/>
         <main className="flex flex-1 flex-col sm:overflow-y-auto">
           <div className="flex flex-1 flex-col overflow-hidden">{children}</div>
         </main>

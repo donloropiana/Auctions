@@ -14,11 +14,14 @@ export async function POST(request: Request) {
 
     const formData = await request.formData();
     const values = JSON.parse(formData.get('values') as string);
+    console.log('Received values:', values);
+    
+    const validatedData = listingFormSchema.parse(values);
+    console.log('Validated data:', validatedData);
+    
     const fileEntries = formData.getAll('files');
     const files = fileEntries as File[];
     
-    const validatedData = listingFormSchema.parse(values);
-  
     // 1. Create price records
     const { data: startPrice, error: startPriceError } = await supabase
       .from('prices')
@@ -49,8 +52,8 @@ export async function POST(request: Request) {
       description: validatedData.description,
       category: validatedData.category,
       volume_ml: validatedData.volume_ml,
-      start_date_time: validatedData.start_date_time,
-      end_date_time: validatedData.end_date_time,
+      start_date_time: new Date(validatedData.start_date_time).toISOString(),
+      end_date_time: new Date(validatedData.end_date_time).toISOString(),
       start_price_id: startPrice.id,
       reserve_price_id: reservePrice.id,
       current_price_id: startPrice.id,
@@ -76,25 +79,25 @@ export async function POST(request: Request) {
     if (updateError) throw updateError;
   
     // 3. Create category-specific record
-    if (validatedData.category === 'wine') {
+    if (validatedData.category === 'wine' && validatedData.wine_details) {
       const { error: wineError } = await supabase
         .from('listings_wines')
         .insert({
           listing_id: listing.id,
-          vintage: validatedData.wine_details?.vintage || 0,
-          varietal: validatedData.wine_details?.varietal || '',
-          region: validatedData.wine_details?.region || '',
+          vintage: validatedData.wine_details.vintage,
+          varietal: validatedData.wine_details.varietal,
+          region: validatedData.wine_details.region,
         });
   
       if (wineError) throw wineError;
-    } else {
+    } else if (validatedData.category === 'spirit' && validatedData.spirit_details) {
       const { error: spiritError } = await supabase
         .from('listings_spirits')
         .insert({
           listing_id: listing.id,
-          age: validatedData.spirit_details?.age || 0,
-          proof: validatedData.spirit_details?.proof || 0,
-          subcategory: validatedData.spirit_details?.subcategory || '',
+          age: validatedData.spirit_details.age,
+          proof: validatedData.spirit_details.proof,
+          subcategory: validatedData.spirit_details.subcategory,
         });
   
       if (spiritError) throw spiritError;
@@ -113,7 +116,7 @@ export async function POST(request: Request) {
   
     return Response.json({ success: true, listingId: listing.id });
   } catch (error) {
-    console.error('Error creating listing:', error);
+    console.error('Detailed error:', error);
     return Response.json(
       { error: 'Failed to create listing' }, 
       { status: 500 }

@@ -8,6 +8,7 @@ type Listing = Database["public"]["Tables"]["listings"]["Row"] & {
 };
 
 export async function getListings(supabase: TypedSupabaseClient) {
+  await supabase.rpc('update_listing_statuses');
   const { data: listings, error: listingsError } = await supabase
     .from('listings')
     .select(`
@@ -33,6 +34,7 @@ export async function getListings(supabase: TypedSupabaseClient) {
 }
 
 export async function getListing(supabase: TypedSupabaseClient, id: number) {
+  await supabase.rpc('update_listing_status', { in_listing_id: id });
   const { data: listing } = await supabase
     .from('listings')
     .select(`
@@ -65,6 +67,7 @@ export async function getListing(supabase: TypedSupabaseClient, id: number) {
   console.log('Bids:', bids);
 
   const priceHistory = [
+    { amount: 0, date: new Date(listing.created_at).toISOString() },
     { amount: listing.start_price.amount, date: listing.start_date_time },
     ...(bids || []).map(bid => ({
       amount: bid.price.amount,
@@ -105,4 +108,67 @@ export async function submitListing(
   }
 
   return response.json();
+}
+
+export async function submitBid(listingId: number, amount: number) {
+  const response = await fetch('/api/bid', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ listingId, amount }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to place bid');
+  }
+
+  return response.json();
+}
+
+export async function getDashboardTransactions(supabase: TypedSupabaseClient, userId: string) {
+  // Get won listings: sold listings where the user is the winning bidder.
+  const { data: wonListings, error: wonError } = await supabase
+    .from('listings')
+    .select(`
+      id,
+      name,
+      brand,
+      end_date_time,
+      buyer_id,
+      current_price:prices!listings_current_price_id_fkey(amount),
+      reserve_price:prices!listings_reserve_price_id_fkey(amount)
+    `)
+    .eq('status', 'sold')
+    .eq('buyer_id', userId);
+
+  if (wonError) throw wonError;
+
+  // Get sold listings: sold listings where the user was the seller.
+  const { data: soldListings, error: soldError } = await supabase
+    .from('listings')
+    .select(`
+      id,
+      name,
+      brand,
+      end_date_time,
+      current_price:prices!listings_current_price_id_fkey(amount),
+      reserve_price:prices!listings_reserve_price_id_fkey(amount)
+    `)
+    .eq('status', 'sold')
+    .eq('seller_id', userId);
+
+  if (soldError) throw soldError;
+
+  // Combine and format the results
+  const transactions = [
+    ...(wonListings || []).map(listing => ({
+      ...listing,
+      type: 'won' as const
+    })),
+    ...(soldListings || []).map(listing => ({
+      ...listing,
+      type: 'sold' as const
+    }))
+  ].sort((a, b) => new Date(b.end_date_time).getTime() - new Date(a.end_date_time).getTime());
+
+  return transactions;
 }

@@ -20,7 +20,12 @@ import { submitListing } from "@/lib/api/listings";
 
 type FormData = z.infer<typeof listingFormSchema>;
 
-export default function ListingForm() {
+// Add prop type for onSuccess callback
+type ListingFormProps = {
+  onSuccess?: () => void;
+};
+
+export default function ListingForm({ onSuccess }: ListingFormProps) {
   const router = useRouter();
   const [files, setFiles] = useState<File[]>([]);
   
@@ -41,7 +46,12 @@ export default function ListingForm() {
         vintage: 0,
         varietal: "",
         region: "",
-      }
+      },
+      spirit_details: {
+        age: 0,
+        proof: 0,
+        subcategory: "",
+      },
     },
   });
 
@@ -55,12 +65,14 @@ export default function ListingForm() {
         varietal: "",
         region: "",
       });
+      form.setValue("spirit_details", undefined);
     } else if (category === "spirit") {
       form.setValue("spirit_details", {
         age: 0,
         proof: 0,
         subcategory: "",
       });
+      form.setValue("wine_details", undefined);
     }
   }, [category, form.setValue]);
 
@@ -78,15 +90,17 @@ export default function ListingForm() {
 
   async function onSubmit(values: FormData) {
     try {
-      console.log("Inside onSubmit function");
-      console.log("Form values:", JSON.stringify(values, null, 2));
-      console.log("Files:", files);
-      
-      // Create FormData to handle file upload
+      const submissionValues = {
+        ...values,
+        start_date_time: new Date(values.start_date_time).toISOString(),
+        end_date_time: new Date(values.end_date_time).toISOString(),
+        spirit_details: values.category === 'spirit' ? values.spirit_details : undefined,
+        wine_details: values.category === 'wine' ? values.wine_details : undefined
+      };
+
       const formData = new FormData();
-      formData.append('values', JSON.stringify(values));
+      formData.append('values', JSON.stringify(submissionValues));
       
-      // Append each file
       files.forEach((file) => {
         formData.append('files', file);
       });
@@ -105,6 +119,9 @@ export default function ListingForm() {
       
       toast.success("Listing created successfully");
       router.push("/listings");
+      router.refresh();
+      onSuccess?.();  // Call the onSuccess callback if provided
+      
     } catch (error) {
       console.error('Error creating listing:', error);
       toast.error("Error creating listing: " + (error as Error).message);
@@ -155,6 +172,11 @@ export default function ListingForm() {
             name="volume_ml"
             label="Volume (ml)"
             type="number"
+            min={0}
+            onChange={(e) => {
+              const value = e.target.value ? parseInt(e.target.value) : 0;
+              form.setValue("volume_ml", value);
+            }}
           />
 
           {/* Category Specific Fields */}
@@ -195,14 +217,22 @@ export default function ListingForm() {
                 name="spirit_details.age"
                 label="Age (years)"
                 type="number"
-                placeholder="12"
+                min={0}
+                onChange={(e) => {
+                  const value = e.target.value ? parseInt(e.target.value) : 0;
+                  form.setValue("spirit_details.age", value);
+                }}
               />
               <InputFormField
                 control={form.control}
                 name="spirit_details.proof"
                 label="Proof"
                 type="number"
-                placeholder="80"
+                min={0}
+                onChange={(e) => {
+                  const value = e.target.value ? parseInt(e.target.value) : 0;
+                  form.setValue("spirit_details.proof", value);
+                }}
               />
               <InputFormField
                 control={form.control}

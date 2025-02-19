@@ -11,7 +11,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export function ListingsHeader() {
+interface ListingsHeaderProps {
+  onSearchChange: (value: string) => void;
+  onCategoryChange: (value: string) => void;
+  onStatusChange: (value: string) => void;
+}
+
+export function ListingsHeader({ onSearchChange, onCategoryChange, onStatusChange }: ListingsHeaderProps) {
   return (
     <div className="bg-gray-50 border-b">
       <div className="container py-4 px-6">
@@ -21,9 +27,10 @@ export function ListingsHeader() {
             <Input
               placeholder="Search listings..."
               className="pl-8"
+              onChange={(e) => onSearchChange(e.target.value)}
             />
           </div>
-          <Select defaultValue="all">
+          <Select defaultValue="all" onValueChange={onCategoryChange}>
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
@@ -33,7 +40,7 @@ export function ListingsHeader() {
               <SelectItem value="spirit">Spirit</SelectItem>
             </SelectContent>
           </Select>
-          <Select defaultValue="all">
+          <Select defaultValue="all" onValueChange={onStatusChange}>
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>

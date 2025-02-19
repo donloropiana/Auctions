@@ -13,21 +13,17 @@ export const metadata: Metadata = {
 // Protected route - only authenticated users can access this page.
 export default async function Registration() {
   const supabase = await createClient()
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser()
+  const { data: { user }, error } = await supabase.auth.getUser()
+  
   if (error || !user) redirect('/login')
 
-  // User is logged in. Fetch user profile.
-  const { data } = await supabase
+  const { data: profile } = await supabase
     .from('profiles')
     .select()
     .eq('id', user.id)
     .single()
 
-  // If registered, redirect to the dashboard.
-  if (data) redirect(REDIRECT_TO)
+  if (profile) redirect('/home')
 
   return (
     <div className="container flex flex-1 flex-col justify-center gap-8 px-6 py-8 xl:gap-14 xl:px-0">

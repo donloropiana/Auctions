@@ -312,7 +312,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      update_listing_current_price: {
+        Args: {
+          in_listing_id: number
+          new_price_id: number
+        }
+        Returns: number
+      }
+      update_listing_status: {
+        Args: {
+          in_listing_id: number
+        }
+        Returns: number
+      }
+      update_listing_statuses: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
     }
     Enums: {
       category: "wine" | "spirit"

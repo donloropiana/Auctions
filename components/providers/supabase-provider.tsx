@@ -11,46 +11,53 @@ import { createClient } from '@/lib/supabase/client'
 import type { Tables } from '@/lib/types/database'
 import type { TypedSupabaseClient } from '@/lib/types/supabase'
 
-type Context =
-  | {
-      supabase: TypedSupabaseClient
-      session: Session | null
-      user: User | null
-      profile: Tables<'profiles'> | undefined
-    }
-  | undefined
+type Context = {
+  supabase: TypedSupabaseClient
+  session: Session | null
+  user: User | null
+  profile: Tables<'profiles'> | undefined
+} | undefined
 
 const SupabaseContext = createContext<Context>(undefined)
 
+type SupabaseProviderProps = {
+  children: React.ReactNode
+  initialSession?: Session | null
+}
+
 export default function SupabaseProvider({
   children,
-}: {
-  children: React.ReactNode
-}) {
+  initialSession = null,
+}: SupabaseProviderProps) {
   const router = useRouter()
   const supabase = createClient()
   const pathname = usePathname()
 
-  const [session, setSession] = useState<Session | null>(null)
-  const [user, setUser] = useState<User | null>(null)
-  
+  // Pre-hydrate using the server-passed initialSession
+  const [session, setSession] = useState<Session | null>(initialSession)
+  const [user, setUser] = useState<User | null>(initialSession ? initialSession.user : null)
+
   const { data: profile, isPending: profilePending } = useQuery({
     queryKey: ['profile'],
     queryFn: () => getProfile(supabase, { id: user?.id as string }),
     enabled: !!user?.id,
   })
 
-  // Move the redirect logic into a useEffect
   useEffect(() => {
-    if (!profilePending && !profile && ![...PUBLIC_ROUTES, '/onboarding'].includes(pathname)) {
+    if (
+      user &&
+      !profilePending &&
+      !profile &&
+      ![...PUBLIC_ROUTES, '/onboarding'].includes(pathname)
+    ) {
       router.replace('/onboarding')
     }
-  }, [profilePending, profile, pathname, router])
+  }, [user, profile, profilePending, pathname, router])
 
   useEffect(() => {
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT') {
         setSession(null)
         setUser(null)

@@ -1,4 +1,4 @@
-import { AudioLines, LayoutDashboard, Martini, UsersRoundIcon } from 'lucide-react'
+import { LayoutDashboard, Martini } from 'lucide-react'
 
 export const sidebarPages = [
   { href: '/listings', name: 'Listings', Icon: Martini },

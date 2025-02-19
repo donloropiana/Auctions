@@ -23,12 +23,8 @@ type ReducedPlaylist = {
 
 export function Sidebar({
   isExpandedInitially,
-  projects,
-  playlists,
 }: {
   isExpandedInitially: boolean
-  projects: ReducedProject[] | null
-  playlists: ReducedPlaylist[] | null
 }) {
   const pathname = usePathname()
   const currentPage = pathname.split('/')[1]
