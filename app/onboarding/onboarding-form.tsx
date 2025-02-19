@@ -32,7 +32,7 @@ export default function OnboardingForm() {
     mutationFn: insertProfile,
     onSuccess: () => {
       toast.success('Onboarding completed. Redirecting to your dashboard...')
-      router.push('/licensing')
+      router.push('/home')
     },
     onError: () => {
       toast.error('Error creating profile. Please try again.')
@@ -41,6 +41,23 @@ export default function OnboardingForm() {
 
   async function onSubmit(values: z.infer<typeof onboardingFormSchema>) {
     if (!user) return
+
+    // Calculate age
+    const birthDate = new Date(values.dob + "T00:00:00")
+    const today = new Date()
+    let age = today.getFullYear() - birthDate.getFullYear()
+    const monthDiff = today.getMonth() - birthDate.getMonth()
+    
+    // Adjust age if birthday hasn't occurred this year
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--
+    }
+
+    if (age < 21) {
+      toast.error("You must be at least 21 years old to register")
+      return
+    }
+
     mutate({
       id: user.id,
       first_name: values.first_name,
@@ -48,7 +65,7 @@ export default function OnboardingForm() {
       username: values.username ?? '',
       dob: values.dob ?? '1970-01-01',
       email: user.email ?? '',
-      avatar_filename: '',
+      avatar_folder_path: '',
     })
   }
 

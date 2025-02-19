@@ -1,14 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { format } from "date-fns"; // Install date-fns if not already in your project
+import { format } from "date-fns";
 import { Calendar } from "./calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "./input";
 import { Controller } from "react-hook-form";
 
 interface CalendarInputProps {
-  control: any; // Replace with your specific Control type if available
+  control: any;
   name: string;
   placeholder?: string;
   label?: string;
@@ -17,36 +17,38 @@ interface CalendarInputProps {
 export function CalendarInput({ control, name, placeholder = "Select date", label }: CalendarInputProps) {
   return (
     <div className="flex flex-col gap-2 text-sm font-medium">
-    {label}
-        <Controller
+      {label}
+      <Controller
         control={control}
         name={name}
         render={({ field }) => (
-            <Popover>
+          <Popover>
             <PopoverTrigger asChild>
-                <Input
+              <Input
                 readOnly
-                value={field.value ? format(new Date(field.value), "yyyy-MM-dd") : ""}
+                value={field.value ? format(new Date(field.value + "T00:00:00"), "yyyy-MM-dd") : ""}
                 placeholder={placeholder}
-                />
+              />
             </PopoverTrigger>
-            <PopoverContent className="p-0">
-                <Calendar
+            <PopoverContent className="w-auto p-0">
+              <Calendar
                 mode="single"
-                captionLayout="dropdown"
+                captionLayout="dropdown-buttons"
                 fromYear={1900}
                 toYear={new Date().getFullYear()}
-                selected={field.value ? new Date(field.value) : undefined}
+                selected={field.value ? new Date(field.value + "T00:00:00") : undefined}
                 onSelect={(date) => {
-                    if (date) {
+                  if (date) {
                     field.onChange(format(date, "yyyy-MM-dd"));
-                    }
+                  }
                 }}
-                />
+                initialFocus
+                disabled={{ after: new Date() }}  // Prevents future dates from being selected
+              />
             </PopoverContent>
-            </Popover>
-        )} 
-        />
+          </Popover>
+        )}
+      />
     </div>
   );
 }

@@ -9,9 +9,274 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      bids: {
+        Row: {
+          bidder_id: string
+          created_at: string
+          id: number
+          listing_id: number
+          price_id: number
+        }
+        Insert: {
+          bidder_id: string
+          created_at?: string
+          id?: number
+          listing_id: number
+          price_id: number
+        }
+        Update: {
+          bidder_id?: string
+          created_at?: string
+          id?: number
+          listing_id?: number
+          price_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bids_bidder_id_fkey"
+            columns: ["bidder_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bids_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bids_price_id_fkey"
+            columns: ["price_id"]
+            isOneToOne: false
+            referencedRelation: "prices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      files: {
+        Row: {
+          created_at: string
+          file_name: string
+          folder_path: string
+          id: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          folder_path: string
+          id?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          folder_path?: string
+          id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "files_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      listings: {
+        Row: {
+          brand: string
+          buyer_id: string | null
+          category: Database["public"]["Enums"]["category"]
+          created_at: string
+          current_price_id: number
+          description: string
+          end_date_time: string
+          folder_path: string
+          id: number
+          name: string
+          reserve_price_id: number | null
+          seller_id: string
+          start_date_time: string
+          start_price_id: number
+          status: Database["public"]["Enums"]["listing_status"]
+          updated_at: string | null
+          volume_ml: number
+        }
+        Insert: {
+          brand: string
+          buyer_id?: string | null
+          category: Database["public"]["Enums"]["category"]
+          created_at?: string
+          current_price_id: number
+          description: string
+          end_date_time: string
+          folder_path: string
+          id?: number
+          name: string
+          reserve_price_id?: number | null
+          seller_id: string
+          start_date_time: string
+          start_price_id: number
+          status?: Database["public"]["Enums"]["listing_status"]
+          updated_at?: string | null
+          volume_ml: number
+        }
+        Update: {
+          brand?: string
+          buyer_id?: string | null
+          category?: Database["public"]["Enums"]["category"]
+          created_at?: string
+          current_price_id?: number
+          description?: string
+          end_date_time?: string
+          folder_path?: string
+          id?: number
+          name?: string
+          reserve_price_id?: number | null
+          seller_id?: string
+          start_date_time?: string
+          start_price_id?: number
+          status?: Database["public"]["Enums"]["listing_status"]
+          updated_at?: string | null
+          volume_ml?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listings_buyer_id_fkey"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_current_price_id_fkey"
+            columns: ["current_price_id"]
+            isOneToOne: false
+            referencedRelation: "prices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_reserve_price_id_fkey"
+            columns: ["reserve_price_id"]
+            isOneToOne: false
+            referencedRelation: "prices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_start_price_id_fkey"
+            columns: ["start_price_id"]
+            isOneToOne: false
+            referencedRelation: "prices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      listings_spirits: {
+        Row: {
+          age: number
+          created_at: string
+          id: number
+          listing_id: number
+          proof: number
+          subcategory: string
+        }
+        Insert: {
+          age: number
+          created_at?: string
+          id?: number
+          listing_id: number
+          proof: number
+          subcategory: string
+        }
+        Update: {
+          age?: number
+          created_at?: string
+          id?: number
+          listing_id?: number
+          proof?: number
+          subcategory?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listings_spirits_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: true
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      listings_wines: {
+        Row: {
+          created_at: string
+          id: number
+          listing_id: number
+          region: string
+          varietal: string
+          vintage: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          listing_id: number
+          region: string
+          varietal: string
+          vintage: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          listing_id?: number
+          region?: string
+          varietal?: string
+          vintage?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listings_wines_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: true
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prices: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          id: number
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency: string
+          id?: number
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          id?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
-          avatar_filename: string
+          avatar_folder_path: string | null
           created_at: string
           dob: string
           email: string
@@ -21,7 +286,7 @@ export type Database = {
           username: string
         }
         Insert: {
-          avatar_filename: string
+          avatar_folder_path?: string | null
           created_at?: string
           dob: string
           email: string
@@ -31,7 +296,7 @@ export type Database = {
           username: string
         }
         Update: {
-          avatar_filename?: string
+          avatar_folder_path?: string | null
           created_at?: string
           dob?: string
           email?: string
@@ -50,7 +315,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      category: "wine" | "spirit"
+      listing_status: "upcoming" | "active" | "sold" | "unsold"
     }
     CompositeTypes: {
       [_ in never]: never
