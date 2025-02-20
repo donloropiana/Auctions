@@ -80,7 +80,7 @@ export async function getListing(supabase: TypedSupabaseClient, id: number) {
   return {
     ...listing,
     imageUrls: (files || []).map(file => 
-      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/auctions_public/${listing.folder_path}${file.name}`.replace(/\/\//g, '/')
+      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/auctions_public/${listing.folder_path}${file.name}`
     ),
     priceHistory
   };
