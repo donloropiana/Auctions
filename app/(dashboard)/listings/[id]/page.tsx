@@ -88,7 +88,7 @@ export default function ListingPage() {
                   <CarouselItem key={index}>
                     <div className="relative aspect-[4/3]">
                       <Image
-                        src={url.replace(/\/\//g, '/')}
+                        src={url}
                         alt={`${listing.name} - Image ${index + 1}`}
                         fill
                         className="object-contain"
