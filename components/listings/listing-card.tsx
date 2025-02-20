@@ -26,7 +26,7 @@ interface ListingCardProps {
 
 export function ListingCard({ listing }: ListingCardProps) {
   const imageUrls = listing.files.map(file => 
-    `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/auctions_public/${file.folder_path}${file.file_name}`.replace(/\/\//g, '/')
+    `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/auctions_public/${file.folder_path}${file.file_name}`
   );
 
   const router = useRouter();

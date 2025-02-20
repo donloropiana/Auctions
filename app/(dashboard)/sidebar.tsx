@@ -10,17 +10,6 @@ import { SidebarToggle } from '@/components/sidebar/sidebar-toggle'
 import { sidebarPages } from '@/lib/data/settings'
 import { cn } from '@/lib/utils'
 
-
-type ReducedProject = {
-  id: string
-  title: string | null
-}
-
-type ReducedPlaylist = {
-  id: string
-  name: string | null
-}
-
 export function Sidebar({
   isExpandedInitially,
 }: {

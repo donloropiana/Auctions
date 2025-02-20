@@ -10,20 +10,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
 import { formatPrice } from '@/lib/utils/price-format';
 import { Line, LineChart, XAxis, YAxis, Tooltip } from 'recharts';
-import { ChartConfig } from '@/components/ui/chart';
 import { ResponsiveContainer } from 'recharts';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-
-const chartConfig = {
-  price: {
-    label: "Price",
-    color: "hsl(var(--chart-1))",
-  },
-} satisfies ChartConfig;
 
 export default function ListingPage() {
   const router = useRouter();
@@ -58,7 +50,7 @@ export default function ListingPage() {
       await queryClient.invalidateQueries({ queryKey: ['listing', id] });
       toast.success('Bid placed successfully!');
     } catch (error) {
-      toast.error('Failed to place bid');
+      toast.error('Failed to place bid: ' + (error as Error).message);
     }
   };
 
