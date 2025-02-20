@@ -96,6 +96,7 @@ export default function ListingPage() {
                       />
                     </div>
                   </CarouselItem>
+                  
                 ))}
               </CarouselContent>
               {listing.imageUrls.length > 1 && (
